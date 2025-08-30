@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gizli Hesap Makinesi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            height: 100vh;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            gap: 1rem;
+            padding: 1rem;
+        }
+        .calculator {
+            background-color: #e3e7eb;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .display {
+            background-color: #f0f4f7;
+            color: #333;
+            font-size: 3rem;
+            text-align: right;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            width: 100%;
+            overflow-x: auto;
+            white-space: nowrap;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            width: 100%;
+        }
+        .btn {
+            background-color: #fafafa;
+            color: #333;
+            font-size: 2rem;
+            font-weight: 500;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            min-height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .btn:hover {
+            background-color: #f0f0f0;
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+        .btn-clear {
+            background-color: #f4d9d9;
+            color: #b22d2d;
+        }
+        .btn-clear:hover {
+            background-color: #f0caca;
+        }
+        .btn-op {
+            background-color: #f5f5dc;
+            color: #6a6a12;
+        }
+        .btn-op:hover {
+            background-color: #f0f0d4;
+        }
+        .btn-equal {
+            background-color: #d8f5e2;
+            color: #329647;
+        }
+        .btn-equal:hover {
+            background-color: #c7eed5;
+        }
+        .btn-zero {
+            grid-column: span 2;
+            border-radius: 0.5rem;
+        }
+        .notification-dot {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 12px;
+            height: 12px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .chat-container {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .message-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            margin-bottom: 0.5rem;
+            word-wrap: break-word;
+        }
+        .sent {
+            background-color: #d1fae5;
+            margin-left: auto;
+        }
+        .received {
+            background-color: #e5e7eb;
+            margin-right: auto;
+        }
+        .input-area {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .input-area input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.75rem;
+            outline: none;
+        }
+        .input-area button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            transition: background-color 0.2s ease;
+        }
+        .input-area button:hover {
+            background-color: #2563eb;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animated {
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Hesap makinesi görünümü -->
+        <div id="calculator-view" class="calculator animated">
+            <div id="display" class="display">0</div>
+            <div class="buttons">
+                <button class="btn btn-clear">AC</button>
+                <button class="btn btn-op">±</button>
+                <button class="btn btn-op">%</button>
+                <button class="btn btn-op">/</button>
+
+                <button class="btn">7</button>
+                <button class="btn">8</button>
+                <button class="btn">9</button>
+                <button class="btn btn-op">*</button>
+
+                <button class="btn">4</button>
+                <button class="btn">5</button>
+                <button class="btn">6</button>
+                <button class="btn btn-op">-</button>
+
+                <button class="btn">1</button>
+                <button class="btn">2</button>
+                <button class="btn">3</button>
+                <button class="btn btn-op">+</button>
+
+                <button class="btn btn-zero">0</button>
+                <button class="btn">.</button>
+                <button id="equal-btn" class="btn btn-equal">
+                    =
+                </button>
+            </div>
+        </div>
+
+        <!-- Gizli mesajlaşma görünümü -->
+        <div id="chat-view" class="chat-container animated hidden">
+            <h2 class="text-xl font-semibold mb-4 text-center">Gizli Sohbet</h2>
+            <div id="user-id-display" class="text-xs text-center text-gray-500 mb-2"></div>
+            <div id="message-box" class="message-box flex flex-col">
+                <!-- Mesajlar buraya eklenecek -->
+            </div>
+            <div class="input-area">
+                <input type="text" id="message-input" placeholder="Mesajını yaz...">
+                <button id="send-btn">Gönder</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const display = document.getElementById('display');
+            const equalBtn = document.getElementById('equal-btn');
+            const calculatorView = document.getElementById('calculator-view');
+            const chatView = document.getElementById('chat-view');
+            const messageInput = document.getElementById('message-input');
+            const sendBtn = document.getElementById('send-btn');
+            const messageBox = document.getElementById('message-box');
+            
+            let currentExpression = '';
+            const SECRET_CODE = '112233';
+
+            const firestorePath = '/artifacts/calculator-chat-app/public/data/messages';
+            
+            // Firebase konfigürasyonunu global değişkenden alıyoruz
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+            let db;
+            let auth;
+            let userId;
+            let isAuthReady = false;
+            let isChatOpen = false;
+            let hasNewMessage = false;
+            
+            setLogLevel('debug');
+
+            if (firebaseConfig) {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        isAuthReady = true;
+                        document.getElementById('user-id-display').textContent = `ID: ${userId.substring(0,8)}`;
+                        console.log(`User ID: ${userId}`);
+                        // Yalnızca kullanıcı oturum açtığında mesajları yükle
+                        loadMessages();
+                    } else {
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch (error) {
+                            console.error("Kimlik doğrulama sırasında bir hata oluştu:", error);
+                        }
+                    }
+                });
+            } else {
+                console.error("Firebase konfigürasyonu bulunamadı.");
+            }
+
+            const loadMessages = async () => {
+                if (!isAuthReady || !db) return;
+
+                const q = query(collection(db, firestorePath));
+                
+                onSnapshot(q, (querySnapshot) => {
+                    const newMessages = querySnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    
+                    const latestMessage = newMessages[newMessages.length - 1];
+
+                    if (latestMessage && latestMessage.senderId !== userId && !isChatOpen) {
+                        if (!hasNewMessage) {
+                             // Yeni mesaj geldi, bildirim noktasını ekle
+                             const notificationDot = document.createElement('div');
+                             notificationDot.classList.add('notification-dot');
+                             equalBtn.appendChild(notificationDot);
+                             hasNewMessage = true;
+                        }
+                    }
+
+                    messageBox.innerHTML = '';
+                    newMessages.forEach((messageData) => {
+                        const messageElement = document.createElement('div');
+                        const isSent = messageData.senderId === userId;
+                        messageElement.classList.add('message', isSent ? 'sent' : 'received');
+                        
+                        let text = messageData.text;
+                        if (messageData.senderId !== userId) {
+                            text = `(${messageData.senderId.substring(0, 8)}...): ${text}`;
+                        }
+
+                        messageElement.textContent = text;
+                        messageBox.appendChild(messageElement);
+                    });
+                    messageBox.scrollTop = messageBox.scrollHeight;
+                }, (error) => {
+                    console.error("Mesajlar yüklenirken hata oluştu:", error);
+                });
+            };
+
+            const sendMessage = async (text) => {
+                if (!isAuthReady || !db) {
+                    console.error("Firebase hazır değil.");
+                    return;
+                }
+                
+                if (text.trim() === '') return;
+                
+                try {
+                    await addDoc(collection(db, firestorePath), {
+                        text: text,
+                        senderId: userId,
+                        timestamp: Date.now()
+                    });
+                    messageInput.value = '';
+                } catch (e) {
+                    console.error("Mesaj gönderilirken hata oluştu: ", e);
+                }
+            };
+
+            // Hesap makinesi mantığı
+            document.querySelectorAll('.btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const value = button.textContent.trim();
+                    
+                    if (value === 'AC') {
+                        currentExpression = '';
+                        display.textContent = '0';
+                    } else if (value === '±' || value === '%' || value === '/' || value === '*' || value === '-' || value === '+') {
+                        if (currentExpression !== '') {
+                             currentExpression += value;
+                             display.textContent = currentExpression;
+                        }
+                    } else if (value === '=') {
+                        // Şifre kontrolü
+                        if (currentExpression === SECRET_CODE) {
+                            calculatorView.classList.add('hidden');
+                            chatView.classList.remove('hidden');
+                            isChatOpen = true;
+
+                            // Bildirim noktasını kaldır
+                            const notificationDot = equalBtn.querySelector('.notification-dot');
+                            if (notificationDot) {
+                                notificationDot.remove();
+                                hasNewMessage = false;
+                            }
+                            
+                        } else {
+                            try {
+                                const result = eval(currentExpression);
+                                display.textContent = result;
+                                currentExpression = String(result);
+                            } catch {
+                                display.textContent = 'Hata';
+                                currentExpression = '';
+                            }
+                        }
+                    } else {
+                        if (currentExpression === 'Hata') {
+                            currentExpression = '';
+                        }
+                        currentExpression += value;
+                        display.textContent = currentExpression;
+                    }
+                });
+            });
+
+            // Sohbet mantığı
+            sendBtn.addEventListener('click', () => {
+                const messageText = messageInput.value;
+                sendMessage(messageText);
+            });
+
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const messageText = messageInput.value;
+                    sendMessage(messageText);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
